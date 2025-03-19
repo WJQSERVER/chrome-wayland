@@ -1,0 +1,15 @@
+Source: chrome-wayland
+Section: utils
+Priority: optional
+Maintainer: WJQSERVER (WJQSERVER-STUDIO) <admin@wjqserver.com>
+Rules-Requires-Root: no
+Build-Depends:
+ debhelper-compat (= 13),
+Standards-Version: 4.7.0
+
+Package: chrome-wayland
+Architecture: any
+Depends:
+ ${misc:Depends},
+ chrome,
+Description: A Patch for chrome to enable Wayland support & VA-API hardware acceleration & Chinese input support
