@@ -11,5 +11,5 @@ Package: chrome-wayland
 Architecture: any
 Depends:
  ${misc:Depends},
- chrome,
+ google-chrome-stable,
 Description: A Patch for chrome to enable Wayland support & VA-API hardware acceleration & Chinese input support
