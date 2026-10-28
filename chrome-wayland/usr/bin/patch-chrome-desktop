@@ -8,31 +8,27 @@ if [ ! -f "$DESKTOP_FILE" ]; then
   exit 0
 fi
 
-# 检查文件是否已包含特定的 Exec 行，并应用补丁
-if grep -q "Exec=/usr/bin/google-chrome-stable %U --ignore-gpu-blocklist --enable-zero-copy --enable-features=UseOzonePlatform,VaapiVideoDecodeLinuxGL,VaapiVideoEncoder --use-angle=gl --enable-gpu-rasterization --ozone-platform=wayland --enable-wayland-ime --wayland-text-input-version=3" "$DESKTOP_FILE"; then
-    # 已经补丁
-    exit 0
-else
-    # 应用补丁
-    sed -i 's|Exec=/usr/bin/google-chrome-stable %U|Exec=/usr/bin/google-chrome-stable %U --ignore-gpu-blocklist --enable-zero-copy --enable-features=UseOzonePlatform,VaapiVideoDecodeLinuxGL,VaapiVideoEncoder --use-angle=gl --enable-gpu-rasterization --ozone-platform=wayland --enable-wayland-ime --wayland-text-input-version=3|' "$DESKTOP_FILE"
-fi
+# 新的启动参数
+NEW_PARAMS="--ignore-gpu-blocklist --enable-zero-copy --enable-features=UseOzonePlatform,VaapiVideoDecodeLinuxGL,VaapiVideoEncoder --use-angle=gl --enable-gpu-rasterization --ozone-platform=wayland --enable-wayland-ime --wayland-text-input-version=3"
 
-# 检查文件是否已包含特定的 Exec 行，并应用补丁
-if grep -q "Exec=/usr/bin/google-chrome-stable --incognito --ignore-gpu-blocklist --enable-zero-copy --enable-features=UseOzonePlatform,VaapiVideoDecodeLinuxGL,VaapiVideoEncoder --use-angle=gl --enable-gpu-rasterization --ozone-platform=wayland --enable-wayland-ime --wayland-text-input-version=3" "$DESKTOP_FILE"; then
-    # 已经补丁
-    exit 0
-else
-    # 应用补丁
-    sed -i 's|Exec=/usr/bin/google-chrome-stable --incognito|Exec=/usr/bin/google-chrome-stable --incognito --ignore-gpu-blocklist --enable-zero-copy --enable-features=UseOzonePlatform,VaapiVideoDecodeLinuxGL,VaapiVideoEncoder --use-angle=gl --enable-gpu-rasterization --ozone-platform=wayland --enable-wayland-ime --wayland-text-input-version=3|' "$DESKTOP_FILE"
-fi
+# 第一步：清理所有已追加的参数，恢复原始 Exec 行
+# 使用标记法避免不同 Exec 行之间互相干扰
 
-# 检查文件是否已包含特定的 Exec 行，并应用补丁
-if grep -q "Exec=/usr/bin/google-chrome-stable --ignore-gpu-blocklist --enable-zero-copy --enable-features=UseOzonePlatform,VaapiVideoDecodeLinuxGL,VaapiVideoEncoder --use-angle=gl --enable-gpu-rasterization --ozone-platform=wayland --enable-wayland-ime --wayland-text-input-version=3" "$DESKTOP_FILE"; then
-    # 已经补丁
-    exit 0
-else
-    # 应用补丁
-    sed -i 's|Exec=/usr/bin/google-chrome-stable|Exec=/usr/bin/google-chrome-stable --ignore-gpu-blocklist --enable-zero-copy --enable-features=UseOzonePlatform,VaapiVideoDecodeLinuxGL,VaapiVideoEncoder --use-angle=gl --enable-gpu-rasterization --ozone-platform=wayland --enable-wayland-ime --wayland-text-input-version=3|' "$DESKTOP_FILE"
-fi
+# 标记 --incognito 行（带参数的）
+sed -i 's|^Exec=/usr/bin/google-chrome-stable --incognito .*|Exec=/usr/bin/google-chrome-stable __INCOGNITO_MARKER__|' "$DESKTOP_FILE"
+# 清理 %U 行（带参数的）
+sed -i 's|^Exec=/usr/bin/google-chrome-stable %U .*|Exec=/usr/bin/google-chrome-stable %U|' "$DESKTOP_FILE"
+# 清理其余行（带参数的，不带 %U 和 --incognito）
+sed -i 's|^Exec=/usr/bin/google-chrome-stable .*|Exec=/usr/bin/google-chrome-stable|' "$DESKTOP_FILE"
+# 恢复 --incognito 行
+sed -i 's|Exec=/usr/bin/google-chrome-stable __INCOGNITO_MARKER__|Exec=/usr/bin/google-chrome-stable --incognito|' "$DESKTOP_FILE"
+
+# 第二步：应用新的启动参数
+# 主窗口（带 %U）
+sed -i "s|^Exec=/usr/bin/google-chrome-stable %U$|Exec=/usr/bin/google-chrome-stable %U $NEW_PARAMS|" "$DESKTOP_FILE"
+# new-private-window action（带 --incognito）
+sed -i "s|^Exec=/usr/bin/google-chrome-stable --incognito$|Exec=/usr/bin/google-chrome-stable --incognito $NEW_PARAMS|" "$DESKTOP_FILE"
+# new-window action（纯，不带 %U 和 --incognito）
+sed -i "s|^Exec=/usr/bin/google-chrome-stable$|Exec=/usr/bin/google-chrome-stable $NEW_PARAMS|" "$DESKTOP_FILE"
 
 exit 0
