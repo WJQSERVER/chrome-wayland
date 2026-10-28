@@ -3,9 +3,8 @@ name: Build deb package and create GitHub Release
 on:
   push:
     tags:
-      - '1.0.1-1'
+      - '1.0.*-1'
       - 'v*'
-      - '*'
 
 permissions:
   contents: write
@@ -32,12 +31,19 @@ jobs:
     - name: Find deb package file
       id: get_filename
       run: |
-        FILE_NAME=$(find .. -maxdepth 1 -name "*.deb" -exec basename {} \; | head -n 1)
+        # debuild 在 chrome-wayland/ 子目录运行，deb 输出到父目录（repo root）
+        FILE_NAME=$(find . -maxdepth 1 -name "*.deb" -exec basename {} \; | head -n 1)
         echo "DEB_FILE_NAME=$FILE_NAME" >> $GITHUB_OUTPUT
-        echo "DEB_FILE_PATH=../$FILE_NAME" >> $GITHUB_OUTPUT
+        echo "DEB_FILE_PATH=$FILE_NAME" >> $GITHUB_OUTPUT
 
-    - name: Create GitHub Release
-      id: create_release
+    - name: Generate SHA256 checksum file
+      id: checksum
+      run: |
+        FILE_PATH="${{ steps.get_filename.outputs.DEB_FILE_PATH }}"
+        sha256sum "$FILE_PATH" > "${FILE_PATH}.sha256"
+        echo "SHA256_FILE=${FILE_PATH}.sha256" >> $GITHUB_OUTPUT
+
+    - name: Create GitHub Release and upload assets
       uses: softprops/action-gh-release@v2
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -47,11 +53,6 @@ jobs:
         draft: false
         prerelease: false
         generate_release_notes: true
-
-    - name: Upload deb package to Release
-      uses: softprops/action-gh-release@v2
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        files: ${{ steps.get_filename.outputs.DEB_FILE_PATH }}
-        tag_name: ${{ github.ref_name }}
+        files: |
+          ${{ steps.get_filename.outputs.DEB_FILE_PATH }}
+          ${{ steps.checksum.outputs.SHA256_FILE }}
