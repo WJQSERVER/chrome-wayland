@@ -1,4 +1,11 @@
 
+chrome-wayland (1.0.2-1) unstable; urgency=medium
+
+  * Bump release to 1.0.2-1
+  * Auto-create GitHub Release on tag push via CI workflow
+
+  -- WJQSERVER (WJQSERVER-STUDIO) <admin@wjqserver.com>  Wed, 28 Oct 2026 20:05:00 +0800
+
 chrome-wayland (1.0.1-1) unstable; urgency=medium
 
   * Fix Wayland GPU acceleration: remove obsolete --ozone-platform-hint=auto
