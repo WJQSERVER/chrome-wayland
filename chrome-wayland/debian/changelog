@@ -1,6 +1,12 @@
 
-chrome-wayland (1.0.0-1) unstable; urgency=medium
+chrome-wayland (1.0.1-1) unstable; urgency=medium
 
-  * Initial release.
+  * Fix Wayland GPU acceleration: remove obsolete --ozone-platform-hint=auto
+  * Replace --enable-features=AcceleratedVideoDecodeLinuxGL with
+    VaapiVideoDecodeLinuxGL,VaapiVideoEncoder for VA-API video acceleration
+  * Add --use-angle=gl to prevent GPU process crash (ANGLE OpenGL backend)
+  * Add --enable-gpu-rasterization for GPU-accelerated rasterization
+  * Keep --ozone-platform=wayland, --enable-wayland-ime,
+    --wayland-text-input-version=3, --ignore-gpu-blocklist, --enable-zero-copy
 
-  -- WJQSERVER (WJQSERVER-STUDIO) <admin@wjqserver.com>  Wed, 19 Mar 2025 15:10:00 +0800
+  -- WJQSERVER (WJQSERVER-STUDIO) <admin@wjqserver.com>  Wed, 28 Oct 2026 20:00:00 +0800
